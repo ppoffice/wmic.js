@@ -1,10 +1,15 @@
 const assert = require('assert');
 const wmic = require('../src/wmic')();
-const unwrap = require('../src/wmic').unwrap;
+const UInt8 = require('../src/Types').UInt8;
+const UInt32 = require('../src/Types').UInt32;
+const UInt64 = require('../src/Types').UInt64;
 
-const KEY_QUERY_VALUE = unwrap('^&H0001');
-const HKEY_CURRENT_USER = unwrap('^&H80000001');
-const HKEY_LOCAL_MACHINE = unwrap('^&H80000002');
+const KEY_QUERY_VALUE = new UInt32(1);
+const HKEY_CLASSES_ROOT = new UInt32(2147483648);
+const HKEY_CURRENT_USER = new UInt32(2147483649);
+const HKEY_LOCAL_MACHINE = new UInt32(2147483650);
+const HKEY_USERS = new UInt32(2147483651);
+const HKEY_CURRENT_CONFIG = new UInt32(2147483653);
 
 /**
  * Edit Windows Registry Using WMIC
@@ -24,11 +29,11 @@ describe('StdRegProv class', function() {
             .then(result => done(assert.equal(result.ReturnValue, 0))).catch(done);
     });
     it('#SetDWORDValue(hDefKey, sSubKeyName, sValueName, uValue)', function(done) {
-        wmic.class('StdRegProv').call('SetDWORDValue', HKEY_CURRENT_USER, '.wmic.js', 'DWORDValue', 250)
+        wmic.class('StdRegProv').call('SetDWORDValue', HKEY_CURRENT_USER, '.wmic.js', 'DWORDValue', new UInt32(4294967295))
             .then(result => done(assert.equal(result.ReturnValue, 0))).catch(done);
     });
     it('#SetQWORDValue(hDefKey, sSubKeyName, sValueName, uValue)', function(done) {
-        wmic.class('StdRegProv').call('SetQWORDValue', HKEY_CURRENT_USER, '.wmic.js', 'QWORDValue', 4294967295 + 1)
+        wmic.class('StdRegProv').call('SetQWORDValue', HKEY_CURRENT_USER, '.wmic.js', 'QWORDValue', new UInt64('18446744073709551615'))
             .then(result => done(assert.equal(result.ReturnValue, 0))).catch(done);
     });
     it('#SetExpandedStringValue(hDefKey, sSubKeyName, sValue, sValueName)', function(done) {
@@ -61,11 +66,11 @@ describe('StdRegProv class', function() {
     });
     it('#GetDWORDValue(hDefKey, sSubKeyName, sValueName)', function(done) {
         wmic.class('StdRegProv').call('GetDWORDValue', HKEY_CURRENT_USER, '.wmic.js', 'DWORDValue')
-            .then(result => done(assert.equal(result.uValue, 250))).catch(done);
+            .then(result => done(assert.equal(result.uValue, 4294967295))).catch(done);
     });
     it('#GetQWORDValue(hDefKey, sSubKeyName, sValueName)', function(done) {
         wmic.class('StdRegProv').call('GetQWORDValue', HKEY_CURRENT_USER, '.wmic.js', 'QWORDValue')
-            .then(result => done(assert.equal(result.uValue, 4294967295 + 1))).catch(done);
+            .then(result => done(assert.equal(new UInt64(result.uValue).toString(), '18446744073709551615'))).catch(done);
     });
     it('#GetExpandedStringValue(hDefKey, sSubKeyName, sValueName)', function(done) {
         wmic.class('StdRegProv').call('GetExpandedStringValue', HKEY_CURRENT_USER, '.wmic.js', 'ExpandedStringValue')

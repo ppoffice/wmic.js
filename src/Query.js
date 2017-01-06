@@ -1,3 +1,5 @@
+const Integer = require('./Types').Integer;
+
 function flatten(array) {
     let ret = [];
     for(let i = 0; i < array.length; i++) {
@@ -21,8 +23,8 @@ function isBoolean(b) {
 function wrapParameter(s) {
     if (isNumeric(s) || isBoolean(s) || s === null) {
         return s;
-    } else if (s instanceof UnwrappedParameter) {
-        return s.value;
+    } else if (s instanceof Integer) {
+        return s.toString();
     }
     return `"${s}"`;
 }
@@ -153,14 +155,7 @@ function prepareNextAllowedMethods(target, method, allowedMethods) {
     }
 }
 
-class UnwrappedParameter {
-    constructor(s) {
-        this.value = s;
-    }
-}
-
 module.exports = {
-    UnwrappedParameter,
     createQuery(options, ...args) {
         const exec = options.exec;
         return new Proxy(new Query(args), {
