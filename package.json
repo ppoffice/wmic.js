@@ -5,7 +5,7 @@
   "main": "src/wmic.js",
   "scripts": {
     "build": "babel src -d lib",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha test/*.js"
   },
   "author": "",
   "license": "ISC",
@@ -13,6 +13,7 @@
     "xml2js": "^0.4.17"
   },
   "devDependencies": {
-    "babel-cli": "^6.18.0"
+    "babel-cli": "^6.18.0",
+    "mocha": "^3.2.0"
   }
 }
