@@ -156,8 +156,7 @@ function prepareNextAllowedMethods(target, method, allowedMethods) {
 }
 
 module.exports = {
-    createQuery(options, ...args) {
-        const exec = options.exec;
+    createQuery(exec, ...args) {
         return new Proxy(new Query(args), {
             get(target, prop, receiver) {
                 if (typeof(target[prop]) === 'function') {

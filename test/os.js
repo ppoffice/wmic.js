@@ -1,4 +1,3 @@
-'use strict';
 const assert = require('assert');
 const wmic = require('../src/wmic')();
 const DateTime = require('../src/Types').DateTime;

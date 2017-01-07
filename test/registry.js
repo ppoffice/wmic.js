@@ -52,13 +52,13 @@ describe('StdRegProv class', function() {
         wmic.class('StdRegProv').call('CreateKey', HKEY_CURRENT_USER, '.wmic.js\\subkey')
             .then(() => {
                 wmic.class('StdRegProv').call('EnumKey', HKEY_CURRENT_USER, '.wmic.js')
-                    .then(result => {done(assert.deepEqual(result.sNames, ['subkey']))}).catch(done);
+                    .then(result => done(assert.deepEqual(result.sNames, ['subkey']))).catch(done);
             }).catch(done);
     });
     it('#EnumValues(hDefKey, sSubKeyName)', function(done) {
         wmic.class('StdRegProv').call('EnumValues', HKEY_CURRENT_USER, '.wmic.js')
-            .then(result => {done(assert.deepEqual(result.sNames,
-                ['BinaryValue', 'DWORDValue', 'QWORDValue', 'ExpandedStringValue', 'MultiStringValue', 'StringValue']))}).catch(done);
+            .then(result => done(assert.deepEqual(result.sNames,
+                ['BinaryValue', 'DWORDValue', 'QWORDValue', 'ExpandedStringValue', 'MultiStringValue', 'StringValue']))).catch(done);
     });
     it('#GetBinaryValue(hDefKey, sSubKeyName, sValueName)', function(done) {
         wmic.class('StdRegProv').call('GetBinaryValue', HKEY_CURRENT_USER, '.wmic.js', 'BinaryValue')

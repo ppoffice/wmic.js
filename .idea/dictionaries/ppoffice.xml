@@ -1,6 +1,9 @@
 <component name="ProjectDictionaryState">
   <dictionary name="ppoffice">
     <words>
+      <w>authlevel</w>
+      <w>failfast</w>
+      <w>implevel</w>
       <w>nointeractive</w>
       <w>rawxml</w>
       <w>wmic</w>
