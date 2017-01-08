@@ -1,18 +1,23 @@
 {
-  "name": "wmic",
+  "name": "wmic-js",
   "version": "0.0.1",
   "description": "",
   "main": "lib/wmic.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ppoffice/wmic.js"
+  },
   "scripts": {
     "changelog": "changelog",
     "build": "rimraf lib/ & babel -d lib/ src/",
     "test": "npm run build & mocha test/*.js"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "babel-runtime": "^6.20.0",
     "bignumber.js": "^3.0.1",
+    "iconv-lite": "^0.4.15",
     "moment": "^2.17.1",
     "xml2js": "^0.4.17"
   },
