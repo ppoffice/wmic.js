@@ -1,6 +1,6 @@
 {
   "name": "wmic",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "",
   "main": "lib/wmic.js",
   "scripts": {
