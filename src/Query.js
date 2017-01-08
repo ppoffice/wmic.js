@@ -77,51 +77,84 @@ class WhereClause {
         this.__where('OR', prop, operator, value);
     }
 
-    __insertWhereArg() {
+    toString() {
         if (this.whereArgs && this.whereArgs.length) {
-            this.args.push('WHERE', `'${ flatten(this.whereArgs).join(' ') }'`);
+            return `'${ flatten(this.whereArgs).join(' ') }'`;
         }
+        return '';
     }
 }
 
-const END_POINT_METHODS = ['get', 'list', 'set', 'call', 'create', 'delete'];
-
-class Query extends WhereClause {
+class Query {
     constructor(args) {
-        super();
         this.args = args;
+        this.whereClause = new WhereClause();
         this.nextMethodAllowed = [].concat(END_POINT_METHODS).concat('find', 'where', 'orWhere');
     }
 
     __checkIfMethodAllowed(method) {
-        if (!method.startsWith('__') && this.nextMethodAllowed.indexOf(method) === -1) {
+        if (this.nextMethodAllowed.indexOf(method) === -1) {
             throw new Error(`Method '${method}' not allowed at this position of the chain!`);
+        }
+        if (['find', 'where', 'orWhere'].indexOf(method) > -1) {
+            const findIndex = this.nextMethodAllowed.indexOf('find');
+            if (findIndex > -1) {
+                this.nextMethodAllowed.splice(findIndex, 1)
+            }
+            if (method === 'find') {
+                for (let m of ['where', 'orWhere']) {
+                    const index = this.nextMethodAllowed.indexOf(m);
+                    if (index > -1) {
+                        this.nextMethodAllowed.splice(index, 1)
+                    }
+                }
+            }
         }
     }
 
     get(...args) {
+        this.__checkIfMethodAllowed('get');
+        if (this.whereClause.toString()) {
+            this.args.push('WHERE', this.whereClause.toString());
+        }
         this.args.push('GET');
         if (args.length) {
             this.args.push(args.join(', '));
         } else {
             this.args.push('*');
         }
+        this.args.push('/FORMAT:RAWXML');
     }
 
     set(fields) {
+        this.__checkIfMethodAllowed('set');
+        if (this.whereClause.toString()) {
+            this.args.push('WHERE', this.whereClause.toString());
+        }
         this.args.push('SET', keyValueToString(fields));
     }
 
     list(format) {
+        this.__checkIfMethodAllowed('list');
+        if (this.whereClause.toString()) {
+            this.args.push('WHERE', this.whereClause.toString());
+        }
         this.args.push('LIST', format ? format : 'BRIEF');
+        this.args.push('/FORMAT:RAWXML');
     }
 
     find(key) {
+        this.__checkIfMethodAllowed('find');
         this.args.push(key);
+        return this;
     }
 
     call(method, ...args) {
-        this.args = this.args.concat('CALL', method)
+        this.__checkIfMethodAllowed('call');
+        if (this.whereClause.toString()) {
+            this.args.push('WHERE', this.whereClause.toString());
+        }
+        this.args = this.args.concat('CALL', method);
         if (args.length) {
             this.args.push(
                 args.map(arg => Array.isArray(arg) ? '(' + arg.map(wrapParameter).join(', ') + ')' : wrapParameter(arg))
@@ -130,53 +163,48 @@ class Query extends WhereClause {
     }
 
     create(fields) {
+        this.__checkIfMethodAllowed('create');
         this.args.push('CREATE', keyValueToString(fields));
     }
 
     delete() {
+        this.__checkIfMethodAllowed('delete');
+        if (this.whereClause.toString()) {
+            this.args.push('WHERE', this.whereClause.toString());
+        }
         this.args.push('DELETE');
+    }
+
+    where(...args) {
+        this.__checkIfMethodAllowed('where');
+        this.whereClause.where(...args);
+        return this;
+    }
+
+    orWhere(...args) {
+        this.__checkIfMethodAllowed('orWhere');
+        this.whereClause.orWhere(...args);
+        return this;
+    }
+
+    toString() {
+        return this.args.join(' ');
     }
 }
 
-function prepareNextAllowedMethods(target, method, allowedMethods) {
-    if (['find', 'where', 'orWhere'].indexOf(method) > -1) {
-        const findIndex = allowedMethods.indexOf('find');
-        if (findIndex > -1) {
-            allowedMethods.splice(findIndex, 1)
-        }
-        if (method === 'find') {
-            for (let m of ['where', 'orWhere']) {
-                const index = allowedMethods.indexOf(m);
-                if (index > -1) {
-                    allowedMethods.splice(index, 1)
-                }
-            }
-        }
-    }
-}
+const END_POINT_METHODS = ['get', 'list', 'set', 'call', 'create', 'delete'];
 
 module.exports = {
     createQuery(exec, ...args) {
-        return new Proxy(new Query(args), {
-            get(target, prop, receiver) {
-                if (typeof(target[prop]) === 'function') {
-                    target.__checkIfMethodAllowed(prop);
-                    prepareNextAllowedMethods(target, prop, target.nextMethodAllowed);
-                    return function (...methodArgs) {
-                        if (END_POINT_METHODS.indexOf(prop) > -1) {
-                            if (prop !== 'create') {
-                                target.__insertWhereArg();
-                            }
-                            target[prop].call(receiver, ...methodArgs);
-                            target.args.push(['get', 'list'].indexOf(prop) > -1 ? '/FORMAT:RAWXML' : '/NOINTERACTIVE');
-                            return exec(target.args.join(' '));
-                        }
-                        target[prop].call(receiver, ...methodArgs);
-                        return receiver;
-                    }
-                }
-                return target[prop];
+        const query = new Query(args);
+        // Proxy end point methods
+        for (let methodName of END_POINT_METHODS) {
+            const oldMethod = query[methodName];
+            query[methodName] = function (..._args) {
+                oldMethod.apply(query, _args);
+                return exec(query.toString());
             }
-        });
+        }
+        return query;
     }
 };

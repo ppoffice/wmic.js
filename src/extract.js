@@ -36,9 +36,9 @@ function extractJson(json) {
                     const instances = result.CIM[0].INSTANCE;
                     return instances.map(instance => {
                         const p = {};
-                        instance.PROPERTY.forEach(prop => {
+                        for (let prop of instance.PROPERTY) {
                             p[prop.$.NAME] = prop.VALUE ? prop.VALUE[0] : null;
-                        });
+                        }
                         return p;
                     });
                 })()

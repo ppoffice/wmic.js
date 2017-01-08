@@ -1,6 +1,7 @@
 const assert = require('assert');
-const wmic = require('../src/wmic');
-const UInt32 = require('../src/Types').UInt32;
+const wmic = require('../lib/wmic');
+const UInt32 = wmic.Types.UInt32;
+
 const KEY_QUERY_VALUE = new UInt32(1);
 const HKEY_LOCAL_MACHINE = new UInt32(2147483650);
 
@@ -35,7 +36,7 @@ describe('Wmic switches', function() {
     it('Wmic FAILFAST switch', function (done) {
         wmic({ failfast: 'ON' }).context().then(result => done(assert.equal(result.FAILFAST.toLowerCase(), 'on'))).catch(done);
     });
-    it('Wmic USER/PASSWORD switch', function (done) {
-
-    });
+    // it('Wmic USER/PASSWORD switch', function (done) {
+    //     // wmic({ node:'remote_address', user: 'username', password: 'password' }).alias('os').list().then(result => console.log(result)).catch(done);
+    // });
 });

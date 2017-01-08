@@ -1,5 +1,4 @@
-const wmic = require('../src/wmic')();
-const unwrap = require('../src/wmic').unwrap;
+const wmic = require('../lib/wmic')();
 
 // wmic.alias('COMPUTERSYSTEM').list('full')
 

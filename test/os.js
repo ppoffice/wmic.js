@@ -1,6 +1,6 @@
 const assert = require('assert');
-const wmic = require('../src/wmic')();
-const DateTime = require('../src/Types').DateTime;
+const wmic = require('../lib/wmic')();
+const DateTime = require('../lib/wmic').Types.DateTime;
 
 describe('Operating System(OS)', function() {
     let serialNumber;

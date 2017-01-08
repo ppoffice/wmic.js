@@ -24,7 +24,7 @@ class DateTime {
         const offset = this.date.getTimezoneOffset();
         let off = String(Math.abs(offset));
         if (off.length < 3) {
-            off = new Array(3 - off.length).fill('0').join('') + off;
+            off = new Array(3 - off.length).map(i => '0').join('') + off;
         }
         off = (Math.sign(offset) === -1 ? '+' : '-') + off;
         return moment(this.date).format('YYYYMMDDHHmmss.SSS000') + off;
@@ -58,7 +58,7 @@ class Integer {
         const tmp = this.value.lessThan(0) ? new BigNumber(2).pow(this.digit).plus(this.value) : this.value;
         let hex = tmp.toString(16);
         if (hex.length < this.digit / 4) {
-            hex = new Array(this.digit / 4 - hex.length).fill('0').join('') + hex;
+            hex = new Array(this.digit / 4 - hex.length).map(i => '0').join('') + hex;
         }
         return '^&H' + hex.toUpperCase();
     }

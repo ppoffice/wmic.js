@@ -1,8 +1,7 @@
 const assert = require('assert');
-const wmic = require('../src/wmic')();
-const UInt8 = require('../src/Types').UInt8;
-const UInt32 = require('../src/Types').UInt32;
-const UInt64 = require('../src/Types').UInt64;
+const wmic = require('../lib/wmic')();
+const UInt32 = require('../lib/wmic').Types.UInt32;
+const UInt64 = require('../lib/wmic').Types.UInt64;
 
 const KEY_QUERY_VALUE = new UInt32(1);
 const HKEY_CLASSES_ROOT = new UInt32(2147483648);
