@@ -83,20 +83,30 @@ class WhereClause {
         }
         return '';
     }
+
+    clone() {
+        const clause = new WhereClause();
+        // Be aware this doesn't clone any complex objects like Date and undefined values.
+        clause.whereArgs = JSON.parse(JSON.stringify(this.whereArgs));
+        return clause;
+    }
 }
+
+const CHAINABLE_METHODS = ['find', 'where', 'orWhere'];
+const END_POINT_METHODS = ['get', 'list', 'set', 'call', 'create', 'delete'];
 
 class Query {
     constructor(args) {
         this.args = args;
         this.whereClause = new WhereClause();
-        this.nextMethodAllowed = [].concat(END_POINT_METHODS).concat('find', 'where', 'orWhere');
+        this.nextMethodAllowed = [].concat(CHAINABLE_METHODS).concat(END_POINT_METHODS);
     }
 
     __checkIfMethodAllowed(method) {
-        if (this.nextMethodAllowed.indexOf(method) === -1) {
-            throw new Error(`Method '${method}' not allowed at this position of the chain!`);
-        }
-        if (['find', 'where', 'orWhere'].indexOf(method) > -1) {
+        if (CHAINABLE_METHODS.indexOf(method) > -1) {
+            if (this.nextMethodAllowed.indexOf(method) === -1) {
+                throw new Error(`Method '${method}' not allowed at this position of the chain!`);
+            }
             const findIndex = this.nextMethodAllowed.indexOf('find');
             if (findIndex > -1) {
                 this.nextMethodAllowed.splice(findIndex, 1)
@@ -146,7 +156,6 @@ class Query {
     find(key) {
         this.__checkIfMethodAllowed('find');
         this.args.push(key);
-        return this;
     }
 
     call(method, ...args) {
@@ -178,33 +187,53 @@ class Query {
     where(...args) {
         this.__checkIfMethodAllowed('where');
         this.whereClause.where(...args);
-        return this;
     }
 
     orWhere(...args) {
         this.__checkIfMethodAllowed('orWhere');
         this.whereClause.orWhere(...args);
-        return this;
     }
 
     toString() {
-        return this.args.join(' ');
+        const args = [...this.args];
+        // if (this.whereClause.toString()) {
+        //     args.push('WHERE', this.whereClause.toString());
+        // }
+        return args.join(' ');
+    }
+
+    clone() {
+        const query = new Query([...this.args]);
+        query.whereClause = this.whereClause.clone();
+        query.nextMethodAllowed = [...this.nextMethodAllowed];
+        return query;
     }
 }
 
-const END_POINT_METHODS = ['get', 'list', 'set', 'call', 'create', 'delete'];
+/**
+ * Proxy methods and make methods immutable
+ */
+function proxyMethods(exec, query) {
+    const methods = [].concat(END_POINT_METHODS).concat(CHAINABLE_METHODS);
+    for (let name of methods) {
+        const oldMethod = query[name];
+        query[name] = function (...args) {
+            const clonedQuery = query.clone();
+            proxyMethods(exec, clonedQuery);
+            oldMethod.apply(clonedQuery, args);
+            if (CHAINABLE_METHODS.indexOf(name) > -1) {
+                return clonedQuery;
+            } else {
+                return exec(clonedQuery.toString());
+            }
+        }
+    }
+}
 
 module.exports = {
     createQuery(exec, ...args) {
         const query = new Query(args);
-        // Proxy end point methods
-        for (let methodName of END_POINT_METHODS) {
-            const oldMethod = query[methodName];
-            query[methodName] = function (..._args) {
-                oldMethod.apply(query, _args);
-                return exec(query.toString());
-            }
-        }
+        proxyMethods(exec, query);
         return query;
     }
 };

@@ -9,7 +9,6 @@ const createQuery = require('./Query').createQuery;
  * @returns {Promise}
  */
 function execCommand(command) {
-    // console.log(command)
     return new Promise((resolve, reject) => {
         exec(command, {maxBuffer: 1024 * 1024 * 10}, (error, stdout, stderr) => {
             if (error) {
@@ -81,5 +80,7 @@ function wmic(options) {
 }
 
 wmic.Types = require('./Types');
+wmic.extract = extract;
+wmic.extractContext = extractContext;
 
 module.exports = wmic;

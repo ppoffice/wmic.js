@@ -4,10 +4,9 @@
   "description": "",
   "main": "lib/wmic.js",
   "scripts": {
-    "clean": "rimraf _test_",
     "changelog": "changelog",
     "build": "rimraf lib/ & babel -d lib/ src/",
-    "test": "rimraf _test_/ & babel -d _test_/ test/ & mocha _test_/*.js"
+    "test": "npm run build & mocha test/*.js"
   },
   "author": "",
   "license": "ISC",
