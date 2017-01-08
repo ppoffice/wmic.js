@@ -35,11 +35,11 @@ const wmic = require('wmic-js');
 
 ## Usage
 
-The goal of wmic.js is to provide an JavaScript interface to WMIC 
-and make it delight for you to run WMIC commands and get result. 
+The goal of wmic.js is to provide a JavaScript interface to WMIC 
+and make it delight for you to run WMIC commands and get the result. 
 Wmic.js supports most of the WMIC features, including all of the 
-alias, class and path, and verbs like get, set, list, call, create 
-and delete. 
+alias, class and path, and verbs like `get`, `set`, `list`, `call`, `create` 
+and `delete`. 
 > For more information about wmic, please run this command:
 > ```cmd
 > wmic /?
