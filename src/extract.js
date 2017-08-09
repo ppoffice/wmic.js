@@ -10,7 +10,7 @@ function removeQuotes(string) {
 
 function formatValue(string) {
     let s = string.trim();
-    if (isNaN(parseInt(s))) {
+    if (isNaN(Number(s))) {
         let se;
         if (se = /^{((.*|\s)*)}$/.exec(s)) {
             return se[1].split(',').map(i => formatValue(removeQuotes(i)));
